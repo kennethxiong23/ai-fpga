@@ -1,4 +1,5 @@
 filename = top
+test_bench = top_tb
 pcf_file = ./common/iceBlinkPico.pcf
 
 build:
@@ -11,3 +12,8 @@ prog: #for sram
 
 clean:
 	rm -rf $(filename).blif $(filename).asc $(filename).json $(filename).bin
+
+test:
+	iverilog -g2012 $(test_bench).sv
+	vvp a.out 
+	gtkwave $(test_bench).vcd 

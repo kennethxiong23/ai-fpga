@@ -1,7 +1,7 @@
 module memory #(
     parameter INIT_FILE = ""
 )(
-    output logic [783:0] read_data
+    output logic [6271:0] read_data
 );
 
     logic [7:0] mem [0:2047];

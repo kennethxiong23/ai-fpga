@@ -3,6 +3,7 @@ module relu #(
 )
 (
     input logic clk,
+    input logic reset,
     input logic signed [map_width*map_width*32-1:0] input_map,
     output logic signed [map_width*map_width*32-1:0] output_map,
     output logic done
@@ -15,13 +16,19 @@ initial begin
 done = 0;
 end
 always_ff @(posedge clk) begin
+    if (reset) begin
+        x <= 0;
+        y <= 0;
+        done <= 0;
+    end else
 
     if (!done) begin
         idx <= (x*map_width + y) * 32; 
         output_map[idx +:32] <= 
-            (input_map[idx +:32] > 0) ? input_map[idx +:32] : 32'd0;
-        
-        if (x == map_width-1 && y == map_width-1) begin
+            ($signed(input_map[idx +:32]) > 0) ? input_map[idx +:32] : 32'd0;
+        if (x==map_width && y==map_width) begin
+            done <= 1;
+        end else if (x == map_width-1 && y == map_width-1) begin
             x <= 0;
             y <= 0;
         end else if (y == map_width-1) begin

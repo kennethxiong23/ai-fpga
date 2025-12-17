@@ -13,46 +13,51 @@ module conv2d #(
     output logic done
 );
 
-    int output_x;
-    int output_y;
+    int output_x = 0;
+    int output_y = 0;
 
-    logic signed [63:0] kernel_sum;
-    logic signed [63:0] weighted_val;
-
-    int base_x;
-    int base_y;
-
-    int input_x;
-    int input_y;
+    logic signed [31:0] kernel_sum;
+    logic signed [31:0] weighted_val;
 
     initial begin
-        output_x = 0;
-        output_y = 0;
+        done = 0;
     end
 
     always_comb begin
-        kernel_sum  = 64'sd0;
-        weighted_val = 64'sd0;
-
-        base_x = output_x * stride;
-        base_y = output_y * stride;
+        kernel_sum  = 31'sd0;
+        weighted_val = 31'sd0;
 
         for (int ky = 0; ky < kernel_size; ky++) begin
             for (int kx = 0; kx < kernel_size; kx++) begin
 
-                int input_x = base_x + kx;
-                int input_y = base_y + ky;
-
-                if (input_x < 0 || input_x >= input_width || input_y < 0 || input_y >= input_width) begin
-                    weighted_val = 64'b0;
+                if (
+                    (stride*output_x+ kx < 0) || 
+                    (stride*output_x+ kx >= input_width) || 
+                    (stride*output_y + ky < 0) || 
+                    (stride*output_y + ky >= input_width)
+                    ) begin
+                    weighted_val = 31'b0;
                 end else begin
-                    weighted_val = $signed(input_image[(input_y*input_width + input_x)*32 +: 32]) * $signed(filter[(ky*kernel_size + kx)*weight_width +: weight_width]);
+                    weighted_val =
+                            $signed(
+                                input_image[
+                                    ((stride*output_y + ky) * input_width
+                                    + (stride*output_x + kx)) * 32
+                                    +: 32
+                                ]
+                            )
+                            *
+                            $signed(
+                                filter[
+                                    (ky * kernel_size + kx) * weight_width
+                                    +: weight_width
+                                ]);
                 end
-
-                kernel_sum += weighted_val;
+                kernel_sum = kernel_sum + weighted_val;
+            end
             end
         end
-    end
+
 
     always_ff @(posedge clk) begin
         if (reset) begin

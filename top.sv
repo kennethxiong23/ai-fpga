@@ -7,7 +7,7 @@ module top #(
     parameter image_width = 5,
     parameter pooled_width = 3,
     parameter kernel_width = 3,
-    parameter stride = 2,
+    parameter stride = 3,
     parameter filtered_width = 2,
     parameter weight_width = 8
 )(
@@ -34,7 +34,7 @@ module top #(
     end
 
     memory #(
-        .INIT_FILE      ("zero_padding.txt"),
+        .INIT_FILE      ("test_imgs/conv_test.txt"),
         .image_width    (image_width)
     ) u1 (
         .read_data      (input_image)

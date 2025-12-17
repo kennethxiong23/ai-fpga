@@ -8,7 +8,8 @@ module top #(
     parameter pooled_width = 3,
     parameter kernel_width = 3,
     parameter stride = 2,
-    parameter filtered_width = 2
+    parameter filtered_width = 2,
+    parameter weight_width = 8
 )(
     input logic clk
 );
@@ -17,19 +18,19 @@ module top #(
     logic conv_reset = 0;
 
     logic signed[image_width*image_width*32-1:0] input_image;
-    
+
     logic relu_done;
     logic max_pool_done;
     logic conv_done;
 
     logic signed [filtered_width*filtered_width*32-1:0] filtered_output;
-    logic [image_width*image_width*32-1:0] relu_output;
+    logic signed[image_width*image_width*32-1:0] relu_output;
     logic signed [pooled_width*pooled_width*32-1:0] pooled_output;
 
-    logic [kernel_width*kernel_width-1:0] filter;
+    logic signed[kernel_width*kernel_width*weight_width-1:0] filter;
 
     initial begin
-        filter = 9'b101010101;
+        filter = {8'b1, 8'b0, 8'b1, 8'b0, 8'b1, 8'b0, 8'b1, 8'b0, 8'b1}; 
     end
 
     memory #(
@@ -40,6 +41,7 @@ module top #(
     );
     conv2d #(
         .kernel_size    (kernel_width),
+        .weight_width   (weight_width),
         .stride         (stride),
         .input_width    (image_width),
         .output_width   (filtered_width)
